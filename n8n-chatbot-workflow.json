@@ -1,0 +1,87 @@
+{
+  "name": "Tyre Engineering Demo — Chatbot",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "engineering-chatbot",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "id": "b1f0a000-0000-4000-8000-000000000001",
+      "name": "Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [240, 300],
+      "webhookId": "engineering-chatbot"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "set-system-prompt",
+              "name": "system_prompt",
+              "type": "string",
+              "value": "={{ $json.body.product === 'bom' ? 'You are a rubber compound and BOM specialist with deep knowledge of tire formulation. You understand phr units, rubber ingredient functions, vulcanization chemistry, MDR rheology, and BOM cost analysis. You are currently showing the user a BOM for: ' + $json.body.context + '. Answer concisely and technically. Use exact industry terminology. Never invent data. If asked about values shown on screen, reference them from the context provided.' : $json.body.product === 'tc' ? 'You are a rubber vulcanization and curing process specialist. You understand Arrhenius kinetics, CEQ accumulation, CEF calculations, thermocouple analysis, and curing press optimization. Current context: ' + $json.body.context + '. Explain calculations step by step when asked. Reference the actual values shown on screen. Use precise terminology: CRI, CEQ, CEF, T90, scorch time, Ea, T_ref.' : 'You are a rubber and tire engineering technical assistant. Answer questions about compound formulation, curing analysis, BOM management, and rubber processing. Be concise and technical.' }}"
+            },
+            {
+              "id": "set-user-message",
+              "name": "user_message",
+              "type": "string",
+              "value": "={{ $json.body.message }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "b1f0a000-0000-4000-8000-000000000002",
+      "name": "Build System Prompt",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [480, 300]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.openai.com/v1/chat/completions",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "openAiApi",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({ model: 'gpt-4o-mini', max_tokens: 600, temperature: 0.4, messages: [ { role: 'system', content: $json.system_prompt }, { role: 'user', content: $json.user_message } ] }) }}",
+        "options": {}
+      },
+      "id": "b1f0a000-0000-4000-8000-000000000003",
+      "name": "OpenAI Chat",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [720, 300]
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ JSON.stringify({ reply: $json.choices[0].message.content }) }}",
+        "options": {}
+      },
+      "id": "b1f0a000-0000-4000-8000-000000000004",
+      "name": "Respond to Webhook",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [960, 300]
+    }
+  ],
+  "connections": {
+    "Webhook": {
+      "main": [[{ "node": "Build System Prompt", "type": "main", "index": 0 }]]
+    },
+    "Build System Prompt": {
+      "main": [[{ "node": "OpenAI Chat", "type": "main", "index": 0 }]]
+    },
+    "OpenAI Chat": {
+      "main": [[{ "node": "Respond to Webhook", "type": "main", "index": 0 }]]
+    }
+  },
+  "settings": { "executionOrder": "v1" },
+  "active": false
+}

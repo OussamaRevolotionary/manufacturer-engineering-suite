@@ -1,0 +1,1029 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Manufacturer Engineering Suite — Oussama Labs</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
+<style>
+:root{
+  --bg:#0D1117; --card:#161B27; --panel:#0F1420; --border:#2D3748;
+  --orange:#F97316; --blue:#3B82F6; --teal:#14B8A6; --purple:#8B5CF6;
+  --success:#00D26A; --warning:#F59E0B; --error:#EF4444;
+  --text:#E2E8F0; --text2:#94A3B8;
+  --r-card:12px; --r-chip:8px; --r-badge:6px;
+  --shadow:0 4px 24px rgba(0,0,0,.4);
+  --mono:'JetBrains Mono',ui-monospace,monospace;
+}
+*{box-sizing:border-box}
+html,body{height:100%}
+body{margin:0;background:var(--bg);color:var(--text);font-family:'Inter',system-ui,sans-serif;font-size:14px;line-height:1.5;-webkit-font-smoothing:antialiased}
+::-webkit-scrollbar{width:10px;height:10px}
+::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:#222b3a;border-radius:6px}
+::-webkit-scrollbar-thumb:hover{background:#2f3b50}
+button{font-family:inherit;cursor:pointer;color:inherit}
+input,textarea,select{font-family:inherit}
+.mono{font-family:var(--mono)}
+.muted{color:var(--text2)}
+
+#topNav{position:sticky;top:0;z-index:100;background:var(--card);border-bottom:1px solid var(--border);padding:0 24px;display:flex;align-items:center;gap:24px;height:64px}
+.nav-brand{display:flex;align-items:center;gap:10px;white-space:nowrap}
+.brand-icon{display:inline-flex;align-items:center;justify-content:center;width:34px;height:34px;border-radius:10px;background:linear-gradient(135deg,var(--orange),#fb923c);color:#1a1205;box-shadow:0 2px 10px rgba(249,115,22,.35)}
+.brand-name{font-weight:800;font-size:16px;letter-spacing:.2px}
+.brand-sub{font-size:12px;color:var(--text2)}
+.section-tabs{display:flex;gap:8px;margin-left:8px}
+.tab-btn{display:flex;align-items:center;gap:8px;background:transparent;border:1px solid transparent;color:var(--text2);padding:8px 16px;border-radius:var(--r-chip);font-weight:600;font-size:13px;transition:all .18s}
+.tab-btn i{width:16px;height:16px}
+.tab-btn:hover{color:var(--text);background:#1c2330}
+.tab-btn.active{color:#fff;background:rgba(249,115,22,.14);border-color:rgba(249,115,22,.4)}
+.nav-right{margin-left:auto;display:flex;align-items:center;gap:12px}
+.badge-live{font-size:11px;font-weight:700;letter-spacing:.5px;color:var(--orange);border:1px solid rgba(249,115,22,.5);background:rgba(249,115,22,.1);padding:4px 10px;border-radius:var(--r-badge)}
+
+.main-content{max-width:1180px;margin:0 auto;padding:24px}
+.app-section.hidden{display:none}
+.app-section.active{display:block;animation:fade .25s ease}
+@keyframes fade{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+
+.card{background:var(--card);border:1px solid var(--border);border-radius:var(--r-card);box-shadow:var(--shadow)}
+.section-header{padding:18px 20px;margin-bottom:16px;border-left:4px solid var(--blue)}
+.section-header.tc{border-left-color:var(--teal)}
+.section-header h1{margin:0;font-size:20px;font-weight:800}
+.section-header p{margin:4px 0 0;color:var(--text2);font-size:13px}
+
+.howto{display:flex;align-items:flex-start;gap:10px;background:rgba(59,130,246,.07);border:1px solid rgba(59,130,246,.25);border-radius:var(--r-card);padding:12px 16px;margin-bottom:18px;font-size:13px;color:#cbd5e1}
+.howto.tc{background:rgba(20,184,166,.07);border-color:rgba(20,184,166,.25)}
+.howto i{width:18px;height:18px;flex:0 0 auto;margin-top:1px;color:var(--blue)}
+.howto.tc i{color:var(--teal)}
+.howto b{color:var(--text)}
+
+.toolbar{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:18px}
+.field-label{font-size:13px;color:var(--text2);font-weight:600}
+select,.btn,.search{background:#1b2230;border:1px solid var(--border);color:var(--text);padding:9px 14px;border-radius:var(--r-chip);font-weight:600;font-size:13px;transition:all .16s}
+.search{font-weight:400}
+select:hover,.btn:hover{border-color:#3d4a60}
+select:focus,.search:focus{outline:none;border-color:var(--blue)}
+.btn-ghost{background:transparent}
+.btn i{width:15px;height:15px;vertical-align:-3px;margin-right:6px}
+.pill-group{display:inline-flex;background:#10151f;border:1px solid var(--border);border-radius:10px;padding:4px;gap:4px;flex-wrap:wrap}
+.pill{padding:8px 16px;border-radius:7px;background:transparent;border:none;color:var(--text2);font-weight:600;font-size:13px;transition:all .16s}
+.pill:hover{color:var(--text)}
+.pill.active{color:#fff}
+.pill-group.bom .pill.active{background:var(--blue)}
+
+/* stat cards */
+.stat-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;margin-bottom:18px}
+.stat{background:var(--card);border:1px solid var(--border);border-radius:var(--r-card);padding:16px;box-shadow:var(--shadow)}
+.stat .lbl{font-size:10px;text-transform:uppercase;letter-spacing:1px;color:var(--text2);margin-bottom:6px;font-weight:600}
+.stat .val{font-size:24px;font-weight:700;line-height:1.1;font-family:var(--mono)}
+.stat .sub{font-size:12px;color:var(--text2);margin-top:3px}
+
+/* family cards */
+.fam-row{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:12px;margin-bottom:18px}
+.fam-card{background:var(--card);border:1px solid var(--border);border-radius:var(--r-card);padding:14px;cursor:pointer;transition:all .16s;box-shadow:var(--shadow)}
+.fam-card:hover{border-color:#3d4a60;transform:translateY(-2px)}
+.fam-card.active{border-color:var(--orange);box-shadow:0 0 0 1px var(--orange),var(--shadow)}
+.fam-card .name{font-weight:700;font-size:14px}
+.fam-card .meta{font-size:11.5px;color:var(--text2);margin:3px 0 9px}
+.sbar{display:flex;height:8px;border-radius:3px;overflow:hidden;gap:1px}
+.sbar .r{background:var(--orange)}.sbar .t{background:var(--teal)}.sbar .s{background:var(--warning)}
+.sbar-key{display:flex;gap:12px;font-size:10px;color:var(--text2);margin-top:6px}
+.sbar-key i{width:9px;height:9px;border-radius:2px;display:inline-block;vertical-align:0;margin-right:4px}
+
+/* tables */
+.table-wrap{overflow-x:auto}
+table{width:100%;border-collapse:collapse;font-size:13px}
+thead th{text-align:left;font-size:11px;text-transform:uppercase;letter-spacing:.5px;color:var(--text2);font-weight:600;padding:11px 12px;border-bottom:1px solid var(--border);background:var(--card)}
+tbody td{padding:9px 12px;border-bottom:1px solid #1e2735;vertical-align:middle}
+tbody tr.clickable{cursor:pointer}
+tbody tr.clickable:hover{background:#1a2230}
+tfoot td{padding:13px 12px;font-weight:700;border-top:2px solid var(--border)}
+.cat-chip{display:inline-block;font-size:11px;font-weight:600;padding:3px 9px;border-radius:var(--r-badge)}
+.phr-val{font-family:var(--mono);font-weight:600}
+.bar-cell{display:flex;align-items:center;gap:10px;min-width:140px}
+.bar{flex:1;height:7px;border-radius:4px;background:#10151f;overflow:hidden}
+.bar>span{display:block;height:100%;border-radius:4px}
+.bar-cell .num{font-family:var(--mono);font-size:12px;width:52px;text-align:right;color:var(--text2)}
+.fn-cell{font-style:italic;color:var(--text2);font-size:12px;max-width:240px}
+.cost-badge{font-family:var(--mono);font-weight:600;color:var(--success);background:rgba(0,210,106,.1);border:1px solid rgba(0,210,106,.35);padding:6px 12px;border-radius:var(--r-badge)}
+.badge{display:inline-flex;align-items:center;padding:3px 9px;border-radius:20px;font-size:10.5px;font-weight:600;font-family:var(--mono)}
+.b-green{background:rgba(0,210,106,.13);color:var(--success)}
+.b-blue{background:rgba(59,130,246,.14);color:#60a5fa}
+.b-amber{background:rgba(245,158,11,.14);color:var(--warning)}
+.b-red{background:rgba(239,68,68,.13);color:var(--error)}
+.b-grey{background:#1e2735;color:var(--text2)}
+.b-teal{background:rgba(20,184,166,.13);color:var(--teal)}
+.b-purple{background:rgba(139,92,246,.14);color:#a78bfa}
+
+/* compound header card */
+.compound-card{display:grid;grid-template-columns:1.3fr 1fr;gap:20px;padding:20px;margin-bottom:18px}
+.cc-left{display:flex;flex-direction:column;gap:10px}
+.cc-badges{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.code-badge{font-family:var(--mono);font-weight:600;font-size:13px;padding:5px 11px;border-radius:var(--r-badge);color:#fff}
+.cc-name{font-size:17px;font-weight:700}
+.cc-app{color:var(--text2);font-size:13px}
+.cc-profile{font-size:13px;color:#cbd5e1;font-style:italic;border-top:1px solid var(--border);padding-top:10px}
+.cc-cost{display:flex;align-items:baseline;gap:8px;margin-top:4px}
+.cc-cost .v{font-family:var(--mono);font-size:22px;font-weight:600;color:var(--success)}
+.cc-cost .k{font-size:12px;color:var(--text2)}
+.mdr-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;align-content:start}
+.mdr-cell{background:#10151f;border:1px solid var(--border);border-radius:var(--r-chip);padding:10px 12px}
+.mdr-cell .lbl{font-size:11px;color:var(--text2)}
+.mdr-cell .val{font-family:var(--mono);font-size:16px;font-weight:600;margin-top:3px}
+.target-strip{grid-column:1/-1;display:flex;gap:8px;flex-wrap:wrap;border-top:1px solid var(--border);padding-top:14px;margin-top:4px}
+.tgt-badge{font-size:11px;font-weight:600;color:var(--success);background:rgba(0,210,106,.1);border:1px solid rgba(0,210,106,.35);padding:5px 9px;border-radius:var(--r-badge)}
+.tgt-badge .k{color:var(--text2);font-weight:500;margin-right:5px}
+
+/* BOM breakdown */
+.bd-head{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin:14px 0}
+.bd-cell{background:#10151f;border:1px solid var(--border);border-radius:var(--r-chip);padding:12px 14px}
+.bd-cell .lbl{font-size:10px;text-transform:uppercase;letter-spacing:.6px;color:var(--text2)}
+.bd-cell .val{font-family:var(--mono);font-size:18px;font-weight:600;margin-top:4px}
+.aggreg{display:flex;align-items:center;gap:10px;margin-bottom:6px}
+.aggreg .k{font-size:10px;text-transform:uppercase;letter-spacing:.6px;color:var(--text2);width:60px;font-weight:600}
+.aggreg .num{font-family:var(--mono);font-size:12px;min-width:96px;text-align:right}
+.grp-title{font-size:10px;text-transform:uppercase;letter-spacing:1px;font-weight:700;margin:14px 0 6px;color:var(--text2);border-bottom:1px solid var(--border);padding-bottom:4px}
+.comp-link{cursor:pointer;color:#60a5fa;text-decoration:underline dotted;text-underline-offset:2px}
+.comp-link:hover{color:#93c5fd}
+
+/* TC */
+.verdict-head{display:grid;grid-template-columns:1.2fr 1fr;gap:16px;padding:18px 20px;margin-bottom:16px}
+.vh-headline .lbl{font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--text2);margin-bottom:8px}
+.vh-headline .v{font-family:var(--mono);font-size:32px;font-weight:600;line-height:1}
+.vh-headline .v.pass{color:var(--success)}.vh-headline .v.fail{color:var(--error)}
+.vh-headline .meta{font-size:12px;color:var(--text2);margin-top:8px;line-height:1.5}
+.vh-matrix{display:grid;grid-template-columns:1fr 1fr;gap:10px;align-content:start}
+.mx-cell{background:#10151f;border:1px solid var(--border);border-radius:var(--r-chip);padding:10px 12px}
+.mx-cell .lbl{font-size:10px;text-transform:uppercase;letter-spacing:.5px;color:var(--text2)}
+.mx-cell .val{font-family:var(--mono);font-size:17px;font-weight:600;margin-top:4px}
+
+.insight-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px;margin-bottom:18px}
+.insight{background:var(--card);border:1px solid var(--border);border-radius:var(--r-card);padding:15px 16px;box-shadow:var(--shadow)}
+.insight .h{display:flex;align-items:center;gap:8px;font-weight:700;font-size:13px;margin-bottom:6px}
+.insight .h i{width:16px;height:16px}
+.insight .big{font-family:var(--mono);font-size:20px;font-weight:600;margin:2px 0 4px}
+.insight p{margin:0;font-size:12px;color:var(--text2);line-height:1.5}
+
+.chart-card{padding:18px 20px;margin-bottom:18px}
+.chart-card h3{margin:0 0 4px;font-size:14px;font-weight:700}
+.chart-card .sub{color:var(--text2);font-size:12px;margin-bottom:14px}
+.chart-box{position:relative}
+.cleg{display:flex;flex-wrap:wrap;gap:6px;margin-top:12px}
+.cleg .it{display:inline-flex;align-items:center;gap:6px;font-size:11px;color:var(--text2);background:#10151f;border:1px solid var(--border);padding:3px 8px;border-radius:14px;cursor:pointer;user-select:none}
+.cleg .it.off{opacity:.4;text-decoration:line-through}
+.cleg .dot{width:9px;height:9px;border-radius:50%}
+
+.mold-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:10px}
+.mold-cell{background:#10151f;border:1px solid var(--border);border-radius:var(--r-chip);padding:11px 13px}
+.mold-cell .z{font-size:12px;font-weight:600}
+.mold-cell .d{font-family:var(--mono);font-size:16px;font-weight:600;margin-top:4px}
+
+/* chatbot widget */
+.cb-fab{position:fixed;right:24px;bottom:24px;z-index:1000;width:60px;height:60px;border-radius:50%;background:linear-gradient(135deg,var(--purple),#a78bfa);border:none;color:#fff;box-shadow:0 8px 28px rgba(139,92,246,.5);display:flex;align-items:center;justify-content:center;transition:transform .2s}
+.cb-fab:hover{transform:scale(1.06)}
+.cb-fab i{width:26px;height:26px}
+.cb-fab .badge-dot{position:absolute;top:6px;right:6px;width:13px;height:13px;border-radius:50%;background:var(--success);border:2px solid #1a1230;box-shadow:0 0 8px var(--success)}
+.cb-fab.hidden{transform:scale(0);pointer-events:none}
+.cb-window{position:fixed;right:24px;bottom:24px;z-index:1001;width:384px;height:min(620px,calc(100vh - 48px));background:var(--panel);border:1px solid var(--border);border-radius:16px;box-shadow:0 16px 50px rgba(0,0,0,.55);display:flex;flex-direction:column;overflow:hidden;transform-origin:bottom right;transition:opacity .2s,transform .2s}
+.cb-window.closed{opacity:0;transform:scale(.85) translateY(10px);pointer-events:none}
+.cb-header{padding:14px 16px;border-bottom:1px solid var(--border);background:#11161f}
+.cb-title-row{display:flex;align-items:center;gap:10px}
+.cb-icon{width:32px;height:32px;border-radius:9px;background:rgba(139,92,246,.16);border:1px solid rgba(139,92,246,.4);display:flex;align-items:center;justify-content:center;color:var(--purple)}
+.cb-icon i{width:18px;height:18px}
+.cb-title{font-weight:700;font-size:14px}
+.cb-actions{margin-left:auto;display:flex;gap:6px}
+.cb-iconbtn{background:transparent;border:1px solid var(--border);border-radius:6px;width:28px;height:28px;display:flex;align-items:center;justify-content:center;color:var(--text2)}
+.cb-iconbtn:hover{color:var(--text);border-color:#3d4a60}
+.cb-iconbtn i{width:16px;height:16px}
+.cb-status{display:flex;align-items:center;gap:14px;margin-top:10px;font-size:11px;color:var(--text2)}
+.cb-online{display:flex;align-items:center;gap:6px}
+.cb-dot{width:8px;height:8px;border-radius:50%;background:var(--success);box-shadow:0 0 8px var(--success);animation:pulse 2s infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.45}}
+.cb-ctx{font-family:var(--mono);color:var(--purple);background:rgba(139,92,246,.1);border:1px solid rgba(139,92,246,.3);padding:2px 8px;border-radius:5px}
+.cb-messages{flex:1;overflow-y:auto;padding:16px;display:flex;flex-direction:column;gap:14px}
+.msg{max-width:88%;display:flex;flex-direction:column;gap:4px}
+.msg .bubble{padding:10px 13px;border-radius:12px;font-size:13px;line-height:1.5;white-space:pre-wrap;word-wrap:break-word}
+.msg .time{font-size:10px;color:var(--text2)}
+.msg.bot{align-self:flex-start}
+.msg.bot .bubble{background:var(--card);border:1px solid var(--border);border-left:3px solid var(--purple);border-radius:4px 12px 12px 12px}
+.msg.user{align-self:flex-end;align-items:flex-end}
+.msg.user .bubble{background:var(--purple);color:#fff;border-radius:12px 4px 12px 12px}
+.quick-prompts{display:flex;flex-wrap:wrap;gap:7px;margin-top:2px}
+.qp{font-size:12px;color:var(--purple);background:rgba(139,92,246,.08);border:1px solid rgba(139,92,246,.3);padding:6px 11px;border-radius:16px;transition:all .15s}
+.qp:hover{background:rgba(139,92,246,.18)}
+.typing{display:flex;gap:4px;align-self:flex-start;background:var(--card);border:1px solid var(--border);padding:12px 14px;border-radius:12px}
+.typing span{width:7px;height:7px;border-radius:50%;background:var(--text2);animation:blink 1.4s infinite both}
+.typing span:nth-child(2){animation-delay:.2s}.typing span:nth-child(3){animation-delay:.4s}
+@keyframes blink{0%,80%,100%{opacity:.25}40%{opacity:1}}
+.cb-error{align-self:stretch;color:var(--warning);background:rgba(245,158,11,.1);border:1px solid rgba(245,158,11,.35);padding:10px 12px;border-radius:8px;font-size:12px;display:flex;flex-direction:column;gap:8px}
+.cb-error .btn{align-self:flex-start;padding:6px 12px;font-size:12px}
+.cb-input{border-top:1px solid var(--border);padding:12px;background:#11161f}
+.cb-charcount{font-size:10px;color:var(--text2);text-align:right;height:13px;margin-bottom:3px}
+.cb-input-row{display:flex;gap:8px;align-items:flex-end}
+.cb-input textarea{flex:1;resize:none;background:#0c1018;border:1px solid var(--border);color:var(--text);border-radius:9px;padding:10px 12px;font-size:13px;max-height:78px;line-height:1.4}
+.cb-input textarea:focus{outline:none;border-color:var(--purple)}
+.cb-send{background:var(--purple);border:none;border-radius:9px;width:40px;height:40px;display:flex;align-items:center;justify-content:center;color:#fff;flex:0 0 auto}
+.cb-send:hover{filter:brightness(1.12)}
+.cb-send i{width:18px;height:18px}
+
+@media (max-width:1024px){
+  .compound-card,.verdict-head{grid-template-columns:1fr}
+  .bd-head{grid-template-columns:1fr 1fr}
+}
+@media (max-width:560px){
+  .main-content{padding:14px}
+  .cb-window{right:0;bottom:0;width:100vw;height:88vh;border-radius:16px 16px 0 0}
+  .cb-fab{right:16px;bottom:16px}
+  .bd-head{grid-template-columns:1fr}
+}
+</style>
+</head>
+<body>
+<header id="topNav">
+  <div class="nav-brand">
+    <span class="brand-icon"><i data-lucide="hexagon"></i></span>
+    <span class="brand-name">Engineering Suite</span>
+    <span class="brand-sub">by Oussama Labs</span>
+  </div>
+  <nav class="section-tabs">
+    <button class="tab-btn active" onclick="switchSection('bom')" id="tab-bom"><i data-lucide="layers"></i> BOM Intelligence</button>
+    <button class="tab-btn" onclick="switchSection('tc')" id="tab-tc"><i data-lucide="thermometer"></i> Cure Analytics</button>
+  </nav>
+  <div class="nav-right"><span class="badge-live">DEMO</span></div>
+</header>
+
+<main class="main-content">
+
+  <!-- ============ BOM SECTION ============ -->
+  <section id="section-bom" class="app-section active">
+    <div class="card section-header">
+      <h1>BOM Intelligence Engine</h1>
+      <p>Tyre bill-of-materials, composition and compound recipes — from catalog to ingredient.</p>
+    </div>
+
+    <div class="howto">
+      <i data-lucide="info"></i>
+      <div><b>How it works:</b> the <b>Catalog</b> lists every tyre configuration and its material composition. Open one to see its <b>BOM Breakdown</b> — every component's weight, split into rubber / textile / steel, with cost. Click any rubber component to drill into its <b>Compound Recipe</b> (the actual mixing formula).</div>
+    </div>
+
+    <div class="pill-group bom" style="margin-bottom:18px">
+      <button class="pill active" id="bv-catalog" onclick="setBomView('catalog')">Tyre Catalog</button>
+      <button class="pill" id="bv-breakdown" onclick="setBomView('breakdown')">BOM Breakdown</button>
+      <button class="pill" id="bv-recipe" onclick="setBomView('recipe')">Compound Recipe</button>
+    </div>
+
+    <!-- VIEW: CATALOG -->
+    <div id="view-catalog">
+      <div class="stat-row" id="catStats"></div>
+      <div class="fam-row" id="famCards"></div>
+      <div class="card" style="overflow:hidden">
+        <div style="padding:12px 16px;border-bottom:1px solid var(--border);display:flex;gap:10px;align-items:center;flex-wrap:wrap">
+          <input class="search" id="catSearch" style="flex:1;min-width:200px" placeholder="Search size, family, construction…" oninput="renderCatalog()">
+          <select id="catFamily" onchange="renderCatalog()"><option value="">All families</option></select>
+          <button class="btn btn-ghost" onclick="clearCatFilters()"><i data-lucide="x"></i>Clear</button>
+          <button class="btn btn-ghost" onclick="exportCatalogCSV()"><i data-lucide="download"></i>CSV</button>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Size</th><th>Family</th><th>Construction</th><th>Status</th><th>Composition (R/T/S)</th><th>Green weight</th><th>Material cost</th></tr></thead>
+            <tbody id="catBody"></tbody>
+          </table>
+        </div>
+        <div style="padding:10px 16px;border-top:1px solid var(--border);font-size:11px;color:var(--text2)" id="catCount"></div>
+      </div>
+    </div>
+
+    <!-- VIEW: BREAKDOWN -->
+    <div id="view-breakdown" style="display:none"></div>
+
+    <!-- VIEW: RECIPE -->
+    <div id="view-recipe" style="display:none">
+      <div class="toolbar">
+        <span class="field-label">Compound:</span>
+        <select id="compoundSelect" onchange="selectCompound(this.value)"></select>
+      </div>
+      <div class="card compound-card" id="compoundCard"></div>
+      <div class="card" style="overflow:hidden">
+        <div style="display:flex;align-items:center;justify-content:space-between;padding:14px 18px;border-bottom:1px solid var(--border)">
+          <strong style="font-size:13px">Recipe — what's inside this compound</strong>
+          <button class="btn btn-ghost" onclick="exportRecipeCSV()"><i data-lucide="download"></i>Download CSV</button>
+        </div>
+        <div class="table-wrap">
+          <table id="recipeTable">
+            <thead><tr><th>Category</th><th>Ingredient</th><th style="text-align:right">phr</th><th>Share of mix</th><th style="text-align:right">Cost ($/100kg)</th><th>What it does</th></tr></thead>
+            <tbody id="recipeBody"></tbody>
+            <tfoot id="recipeFoot"></tfoot>
+          </table>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ TC SECTION ============ -->
+  <section id="section-tc" class="app-section hidden">
+    <div class="card section-header tc">
+      <h1>Cure Analytics — Thermocouple Analysis</h1>
+      <p>12 instrumented positions · Arrhenius cure-equivalent (CEQ) · press-open to end</p>
+    </div>
+
+    <div class="howto tc">
+      <i data-lucide="info"></i>
+      <div><b>What this shows:</b> during a curing cycle, 12 thermocouples track temperature across the tyre. We convert each temperature history into <b>CEQ</b> (cure-equivalent minutes) to judge whether every zone reached an adequate, even cure — and how much extra cure builds up after the press opens.</div>
+    </div>
+
+    <div class="card verdict-head" id="verdictHead"></div>
+
+    <div class="insight-grid" id="insightGrid"></div>
+
+    <div class="card chart-card">
+      <h3>1 · Temperature — 12 positions</h3>
+      <div class="sub">Thermocouple temperature per position over the cycle. Dashed amber line = 150 °C reference. Dashed grey line = press open.</div>
+      <div class="chart-box" style="height:320px"><canvas id="tempChart"></canvas></div>
+      <div class="cleg" id="legTemp"></div>
+    </div>
+
+    <div class="card chart-card">
+      <h3>2 · CEQ Accumulation — 12 positions</h3>
+      <div class="sub">Cumulative cure-equivalent minutes (Arrhenius, 150 °C ref) building up per position. Growth after the press-open line is post-deflation cure.</div>
+      <div class="chart-box" style="height:320px"><canvas id="ceqChart"></canvas></div>
+      <div class="cleg" id="legCeq"></div>
+    </div>
+
+    <div class="card chart-card" style="margin-bottom:18px">
+      <h3>Press / Mold Health — top vs bottom ΔT</h3>
+      <div class="sub">Temperature symmetry across 6 top/bottom position pairs. A trustworthiness gate, <b>advisory only</b> — it never changes the cure verdict.</div>
+      <div class="mold-grid" id="moldGrid"></div>
+    </div>
+
+    <div class="card" style="overflow:hidden">
+      <div style="padding:14px 18px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between">
+        <strong style="font-size:13px">Per-position detail — CEQ &amp; %CEF</strong>
+        <button class="btn btn-ghost" onclick="exportTCDetailCSV()"><i data-lucide="download"></i>CSV</button>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>Pos</th><th>Zone</th><th>Compound</th><th style="text-align:right">Tmax °C</th><th style="text-align:right">CEQ@open</th><th style="text-align:right">CEQ@end</th><th style="text-align:right">post-cure</th><th style="text-align:right">%CEF</th><th>Assessment</th></tr></thead>
+          <tbody id="tcDetailBody"></tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+</main>
+
+<!-- ============ CHATBOT WIDGET ============ -->
+<button class="cb-fab" id="cbFab" onclick="openChatbot()" title="Ask the technical assistant">
+  <i data-lucide="message-circle"></i><span class="badge-dot"></span>
+</button>
+<div class="cb-window closed" id="cbWindow">
+  <div class="cb-header">
+    <div class="cb-title-row">
+      <div class="cb-icon"><i data-lucide="bot"></i></div>
+      <span class="cb-title">Technical Assistant</span>
+      <div class="cb-actions">
+        <button class="cb-iconbtn" onclick="resetConversation()" title="Reset conversation"><i data-lucide="rotate-ccw"></i></button>
+        <button class="cb-iconbtn" onclick="closeChatbot()" title="Minimize"><i data-lucide="chevron-down"></i></button>
+      </div>
+    </div>
+    <div class="cb-status">
+      <span class="cb-online"><span class="cb-dot"></span>Online</span>
+      <span class="cb-ctx" id="ctxBadge">BOM</span>
+    </div>
+  </div>
+  <div class="cb-messages" id="cbMessages"></div>
+  <div class="cb-input">
+    <div class="cb-charcount" id="charCount"></div>
+    <div class="cb-input-row">
+      <textarea id="cbInput" rows="1" placeholder="Ask about formulations, curing, or compounds..." oninput="onInputChange()" onkeydown="onInputKey(event)"></textarea>
+      <button class="cb-send" onclick="onSendClick()" title="Send"><i data-lucide="send"></i></button>
+    </div>
+  </div>
+</div>
+
+<script>
+/* ============================================================
+   COMPOUND RECIPES (demo formulations — generic)
+   ============================================================ */
+const COMPOUNDS = {
+  "TC-A100": { name:"TC-A100 — Economy Passenger Tread", application:"Passenger Car Radial — Economy / City", profile:"High silica formulation for fuel efficiency and wet grip", color:"#3B82F6",
+    ingredients:[
+      {id:"A1",category:"Polymer",name:"NR (Natural Rubber)",phr:40.0,unitCost:1.85,function:"Base elastomer — resilience"},
+      {id:"A2",category:"Polymer",name:"SBR 1502",phr:60.0,unitCost:1.45,function:"Abrasion resistance"},
+      {id:"A3",category:"Filler",name:"Silica (ULTRASIL 7000 GR)",phr:65.0,unitCost:1.20,function:"Fuel efficiency + wet grip"},
+      {id:"A4",category:"Filler",name:"Carbon Black N375",phr:10.0,unitCost:0.95,function:"UV protection + reinforcement"},
+      {id:"A5",category:"Coupling",name:"TESPT (Si69)",phr:5.2,unitCost:8.50,function:"Silica-polymer coupling"},
+      {id:"A6",category:"Activator",name:"Zinc Oxide",phr:3.0,unitCost:2.10,function:"Vulcanization activator"},
+      {id:"A7",category:"Activator",name:"Stearic Acid",phr:2.0,unitCost:0.85,function:"Co-activator + processing"},
+      {id:"A8",category:"Antideg",name:"6PPD Antiozonant",phr:2.0,unitCost:5.20,function:"Ozone cracking protection"},
+      {id:"A9",category:"Antideg",name:"TMQ Antioxidant",phr:1.0,unitCost:3.80,function:"Thermal aging protection"},
+      {id:"A10",category:"Antideg",name:"PEG 4000",phr:2.5,unitCost:2.40,function:"Silica surface modifier"},
+      {id:"A11",category:"Process",name:"TDAE Process Oil",phr:8.0,unitCost:0.70,function:"Processing fluidity"},
+      {id:"A12",category:"Curative",name:"CBS Accelerator",phr:1.8,unitCost:6.80,function:"Primary accelerator"},
+      {id:"A13",category:"Curative",name:"DPG Accelerator",phr:2.0,unitCost:4.20,function:"Secondary — silica compatibility"},
+      {id:"A14",category:"Curative",name:"Sulfur",phr:1.4,unitCost:0.40,function:"Cross-linking agent"},
+    ], mdProperties:{T90:14.2,Scorch:3.8,MHMinus_ML:5.2,Ea:115}, targetProperties:{hardness:"60-65 Shore A",tensile:">14 MPa",elongation:">400%",abrasion:"<120 mm³"} },
+  "TC-B200": { name:"TC-B200 — High Performance Tread", application:"Passenger Car Radial — Sport / High Performance", profile:"Carbon black dominant — maximum grip and handling response", color:"#EF4444",
+    ingredients:[
+      {id:"B1",category:"Polymer",name:"SBR 1712 (oil-extended)",phr:82.5,unitCost:1.55,function:"High styrene — wet grip"},
+      {id:"B2",category:"Polymer",name:"BR 9000 (Polybutadiene)",phr:25.0,unitCost:1.65,function:"Rolling resistance + low temp"},
+      {id:"B3",category:"Filler",name:"Carbon Black N234",phr:80.0,unitCost:1.10,function:"High-structure — max grip"},
+      {id:"B4",category:"Filler",name:"Carbon Black N375",phr:10.0,unitCost:0.95,function:"Secondary reinforcement"},
+      {id:"B5",category:"Activator",name:"Zinc Oxide",phr:3.5,unitCost:2.10,function:"Vulcanization activator"},
+      {id:"B6",category:"Activator",name:"Stearic Acid",phr:2.0,unitCost:0.85,function:"Co-activator"},
+      {id:"B7",category:"Antideg",name:"6PPD Antiozonant",phr:3.0,unitCost:5.20,function:"Ozone protection — sport exposure"},
+      {id:"B8",category:"Antideg",name:"TMQ Antioxidant",phr:1.5,unitCost:3.80,function:"Thermal aging"},
+      {id:"B9",category:"Process",name:"DAE Process Oil",phr:5.0,unitCost:0.65,function:"Processing — aromatic type"},
+      {id:"B10",category:"Curative",name:"TBBS Accelerator",phr:1.7,unitCost:6.20,function:"Primary sulfenamide"},
+      {id:"B11",category:"Curative",name:"DCBS Accelerator",phr:0.5,unitCost:7.10,function:"Secondary — retarded action"},
+      {id:"B12",category:"Curative",name:"Sulfur",phr:1.6,unitCost:0.40,function:"Cross-linking"},
+    ], mdProperties:{T90:11.8,Scorch:2.9,MHMinus_ML:7.1,Ea:130}, targetProperties:{hardness:"62-68 Shore A",tensile:">16 MPa",elongation:">350%",abrasion:"<100 mm³"} },
+  "TC-C300": { name:"TC-C300 — SUV / 4x4 Sidewall", application:"Passenger Car Radial SUV — Sidewall Component", profile:"Flex-resistant with enhanced antidegradant system for high-load cycling", color:"#F97316",
+    ingredients:[
+      {id:"C1",category:"Polymer",name:"NR (Natural Rubber)",phr:60.0,unitCost:1.85,function:"Flex fatigue resistance"},
+      {id:"C2",category:"Polymer",name:"BR 9000 (Polybutadiene)",phr:40.0,unitCost:1.65,function:"Crack propagation resistance"},
+      {id:"C3",category:"Filler",name:"Carbon Black N550",phr:55.0,unitCost:0.90,function:"Intermediate structure — flexing"},
+      {id:"C4",category:"Filler",name:"Carbon Black N770",phr:10.0,unitCost:0.85,function:"Softening effect"},
+      {id:"C5",category:"Activator",name:"Zinc Oxide",phr:5.0,unitCost:2.10,function:"Higher loading — flex conditions"},
+      {id:"C6",category:"Activator",name:"Stearic Acid",phr:2.0,unitCost:0.85,function:"Co-activator"},
+      {id:"C7",category:"Antideg",name:"6PPD Antiozonant",phr:3.5,unitCost:5.20,function:"Critical for sidewall ozone"},
+      {id:"C8",category:"Antideg",name:"TMQ Antioxidant",phr:2.0,unitCost:3.80,function:"Thermal + fatigue aging"},
+      {id:"C9",category:"Antideg",name:"Microcrystalline Wax",phr:1.5,unitCost:2.20,function:"Surface ozone barrier"},
+      {id:"C10",category:"Process",name:"TDAE Process Oil",phr:3.0,unitCost:0.70,function:"Minimal oil — stiffness control"},
+      {id:"C11",category:"Curative",name:"CBS Accelerator",phr:0.8,unitCost:6.80,function:"Primary accelerator"},
+      {id:"C12",category:"Curative",name:"MBTS Accelerator",phr:0.3,unitCost:5.50,function:"Secondary — extended scorch"},
+      {id:"C13",category:"Curative",name:"Sulfur",phr:2.2,unitCost:0.40,function:"Higher CV — flex endurance"},
+    ], mdProperties:{T90:16.5,Scorch:4.2,MHMinus_ML:6.3,Ea:112}, targetProperties:{hardness:"55-60 Shore A",tensile:">12 MPa",elongation:">450%",abrasion:"<150 mm³"} },
+  "TC-D400": { name:"TC-D400 — Commercial Vehicle Tread", application:"Truck / Bus Radial — High Load Tread", profile:"NR-dominant for high tensile strength and heat dissipation under heavy loads", color:"#14B8A6",
+    ingredients:[
+      {id:"D1",category:"Polymer",name:"NR (Natural Rubber)",phr:70.0,unitCost:1.85,function:"High tensile + heat build-up control"},
+      {id:"D2",category:"Polymer",name:"SBR 1502",phr:30.0,unitCost:1.45,function:"Abrasion resistance"},
+      {id:"D3",category:"Filler",name:"Carbon Black N375",phr:55.0,unitCost:0.95,function:"Primary reinforcement"},
+      {id:"D4",category:"Filler",name:"Carbon Black N550",phr:25.0,unitCost:0.90,function:"Secondary — hardness balance"},
+      {id:"D5",category:"Activator",name:"Zinc Oxide",phr:5.0,unitCost:2.10,function:"Higher loading — commercial grade"},
+      {id:"D6",category:"Activator",name:"Stearic Acid",phr:2.0,unitCost:0.85,function:"Co-activator"},
+      {id:"D7",category:"Antideg",name:"6PPD Antiozonant",phr:2.5,unitCost:5.20,function:"Ozone protection"},
+      {id:"D8",category:"Antideg",name:"TMQ Antioxidant",phr:1.5,unitCost:3.80,function:"High-temp aging — commercial use"},
+      {id:"D9",category:"Process",name:"TDAE Process Oil",phr:5.0,unitCost:0.70,function:"Processing aid"},
+      {id:"D10",category:"Curative",name:"Tackifier Resin (C5)",phr:3.0,unitCost:2.80,function:"Green tack — building adhesion"},
+      {id:"D11",category:"Curative",name:"TBBS Accelerator",phr:1.2,unitCost:6.20,function:"Primary accelerator"},
+      {id:"D12",category:"Curative",name:"DPG Accelerator",phr:0.5,unitCost:4.20,function:"Secondary — commercial cure"},
+      {id:"D13",category:"Curative",name:"Sulfur",phr:2.8,unitCost:0.40,function:"High CV — load-bearing endurance"},
+    ], mdProperties:{T90:19.3,Scorch:4.8,MHMinus_ML:8.2,Ea:108}, targetProperties:{hardness:"65-72 Shore A",tensile:">18 MPa",elongation:">380%",abrasion:"<80 mm³"} },
+};
+const RECIPE_COMPOUNDS = ["TC-A100","TC-B200","TC-C300","TC-D400"];
+const CAT_COLORS = {
+  Polymer:{c:"#3B82F6",bg:"rgba(59,130,246,.14)"}, Filler:{c:"#F59E0B",bg:"rgba(245,158,11,.14)"},
+  Coupling:{c:"#14B8A6",bg:"rgba(20,184,166,.14)"}, Activator:{c:"#00D26A",bg:"rgba(0,210,106,.14)"},
+  Antideg:{c:"#8B5CF6",bg:"rgba(139,92,246,.14)"}, Process:{c:"#94A3B8",bg:"rgba(148,163,184,.14)"},
+  Curative:{c:"#F97316",bg:"rgba(249,115,22,.14)"},
+};
+const CAT_LABELS = { Polymer:"Rubber base", Filler:"Reinforcement", Coupling:"Coupling agent", Activator:"Activator", Antideg:"Protection", Process:"Processing aid", Curative:"Curing system" };
+
+/* ============================================================
+   TYRE CATALOG + BOM (IRIS-inspired structure, generic data)
+   Each tyre's component weights are COMPUTED from a component
+   template scaled to green weight (geometry-style derivation).
+   ============================================================ */
+const FAMILIES = {
+  City:       { label:"City",       desc:"Economy passenger — low rolling resistance", treadCompound:"TC-A100", skew:{} },
+  Sport:      { label:"Sport",      desc:"High performance — grip & handling",         treadCompound:"TC-B200", skew:{TCAP:1.12,TBAS:1.05,SW:0.95} },
+  SUV:        { label:"SUV",        desc:"4x4 / crossover — high load",                treadCompound:"TC-A100", skew:{SW:1.15,B2S:1.20,B2R:1.20,TBAS:1.10} },
+  Commercial: { label:"Commercial", desc:"Truck / van — heavy duty",                   treadCompound:"TC-D400", skew:{B1S:1.25,B1R:1.20,B2S:1.30,B2R:1.25,BW:1.20,BPT:1.15,BPS:1.15} },
+};
+// component template: key,label,group,class,price$/kg,frac, compound(optional link)
+const COMPONENTS = [
+  {key:"IL",  label:"Inner Liner",        group:"Inner liner", cls:"rubber",  price:2.9, frac:0.105, compound:"ILC-500"},
+  {key:"SW",  label:"Sidewall (×2)",      group:"Sidewall",    cls:"rubber",  price:2.4, frac:0.115, compound:"TC-C300"},
+  {key:"BPT", label:"Body Ply Cord",      group:"Body ply",    cls:"textile", price:3.6, frac:0.110},
+  {key:"BPS", label:"Body Ply Skim",      group:"Body ply",    cls:"rubber",  price:2.2, frac:0.055},
+  {key:"AP",  label:"Apex",               group:"Apex & bead", cls:"rubber",  price:2.5, frac:0.035, compound:"BAC-300"},
+  {key:"BW",  label:"Bead Wire (×2)",     group:"Apex & bead", cls:"steel",   price:1.6, frac:0.040},
+  {key:"B1S", label:"Belt 1 Steel Cord",  group:"Belt 1",      cls:"steel",   price:1.7, frac:0.060},
+  {key:"B1R", label:"Belt 1 Skim",        group:"Belt 1",      cls:"rubber",  price:2.2, frac:0.055, compound:"BSC-100"},
+  {key:"B2S", label:"Belt 2 Steel Cord",  group:"Belt 2",      cls:"steel",   price:1.7, frac:0.035},
+  {key:"B2R", label:"Belt 2 Skim",        group:"Belt 2",      cls:"rubber",  price:2.2, frac:0.035, compound:"BSC-100"},
+  {key:"CPT", label:"Cap Ply Cord",       group:"Cap ply",     cls:"textile", price:3.8, frac:0.030},
+  {key:"CPR", label:"Cap Ply Skim",       group:"Cap ply",     cls:"rubber",  price:2.2, frac:0.015},
+  {key:"TCAP",label:"Tread Cap",          group:"Tread",       cls:"rubber",  price:2.6, frac:0.180},
+  {key:"TBAS",label:"Tread Base",         group:"Tread",       cls:"rubber",  price:2.1, frac:0.060},
+  {key:"TWNG",label:"Tread Wing/Chimney", group:"Tread",       cls:"rubber",  price:2.3, frac:0.030},
+];
+const CLASS_COLOR = { rubber:"var(--orange)", textile:"var(--teal)", steel:"var(--warning)" };
+const STATUS_BADGE = {"ready for prod":"b-green","BOM":"b-blue","industrialization":"b-amber","test":"b-teal","on hold":"b-red"};
+const TYRES = [
+  {code:"C-1401", family:"City",       size:"165/70 R14", construction:"1+0", status:"ready for prod", green:5600},
+  {code:"C-1405", family:"City",       size:"175/70 R14", construction:"1+0", status:"ready for prod", green:5900},
+  {code:"C-1512", family:"City",       size:"185/65 R15", construction:"1+0", status:"ready for prod", green:6300},
+  {code:"C-1518", family:"City",       size:"195/65 R15", construction:"1+0", status:"BOM",            green:6700},
+  {code:"S-1604", family:"Sport",      size:"205/55 R16", construction:"1+0", status:"ready for prod", green:7200},
+  {code:"S-1709", family:"Sport",      size:"225/45 R17", construction:"2+0", status:"industrialization", green:7900},
+  {code:"S-1812", family:"Sport",      size:"235/40 R18", construction:"2+0", status:"test",           green:8300},
+  {code:"U-1607", family:"SUV",        size:"215/65 R16", construction:"2+0", status:"ready for prod", green:8100},
+  {code:"U-1811", family:"SUV",        size:"235/60 R18", construction:"2+0", status:"industrialization", green:9100},
+  {code:"K-16C1", family:"Commercial", size:"195/75 R16C",construction:"2+0", status:"ready for prod", green:9600},
+  {code:"K-16C5", family:"Commercial", size:"215/75 R16C",construction:"2+0", status:"BOM",            green:10200},
+];
+// compute per-tyre component weights (scaled so total = green weight)
+function tyreBOM(t){
+  const skew=FAMILIES[t.family].skew;
+  let raw={}, rawSum=0;
+  COMPONENTS.forEach(c=>{ const w=t.green*c.frac*(skew[c.key]||1); raw[c.key]=w; rawSum+=w; });
+  const k=t.green/rawSum;
+  let bom={};
+  COMPONENTS.forEach(c=>{ bom[c.key]=raw[c.key]*k; });
+  return bom;
+}
+function compByClass(bom,cls){ return COMPONENTS.filter(c=>c.cls===cls).reduce((s,c)=>s+bom[c.key],0); }
+function tyreCost(bom){ return COMPONENTS.reduce((s,c)=>s+bom[c.key]/1000*c.price,0); }
+function tyreTreadCompound(t){ return FAMILIES[t.family].treadCompound; }
+
+/* ============================================================
+   CURE ENGINE — 12 instrumented positions (Arrhenius CEQ)
+   ============================================================ */
+const TC_CONFIG = { R:8.3145, Tref_C:150, Tref_K:423.15, dt:1/6, rampEnd:2.5, PO:11, END:16, kcool:0.18, AMB:40, TaT_floor:160 };
+// optimum CEQ per compound (= batch T90 × shift equivalent) for %CEF denominator
+const CURE_COMPOUNDS = {
+  "TC-A100":{Ea:100000, opt:38}, "TC-B200":{Ea:104000, opt:36}, "TC-C300":{Ea:98000, opt:40},
+  "BSC-100":{Ea:107000, opt:52}, "BAC-300":{Ea:96000, opt:46}, "ILC-500":{Ea:105000, opt:42},
+};
+const POSITIONS = [
+  {ch:1,  zone:"Tread Center",  side:"T", compound:"TC-A100", tmax:172},
+  {ch:2,  zone:"Tread Center",  side:"B", compound:"TC-A100", tmax:174},
+  {ch:3,  zone:"Tread Shoulder",side:"T", compound:"TC-B200", tmax:170},
+  {ch:4,  zone:"Tread Shoulder",side:"B", compound:"TC-B200", tmax:173},
+  {ch:5,  zone:"Belt Edge",     side:"T", compound:"BSC-100", tmax:177},
+  {ch:6,  zone:"Belt Edge",     side:"B", compound:"BSC-100", tmax:178},
+  {ch:7,  zone:"Sidewall",      side:"T", compound:"TC-C300", tmax:171},
+  {ch:8,  zone:"Sidewall",      side:"B", compound:"TC-C300", tmax:176},
+  {ch:9,  zone:"Bead Apex",     side:"T", compound:"BAC-300", tmax:179},
+  {ch:10, zone:"Bead Apex",     side:"B", compound:"BAC-300", tmax:178},
+  {ch:11, zone:"Inner Liner",   side:"T", compound:"ILC-500", tmax:184},
+  {ch:12, zone:"Inner Liner",   side:"B", compound:"ILC-500", tmax:176},
+];
+const TC_COLORS = ["#F97316","#FB923C","#3B82F6","#60A5FA","#14B8A6","#2DD4BF","#8B5CF6","#A78BFA","#00D26A","#4ADE80","#F472B6","#FACC15"];
+
+function criOf(T_c,Ea){ return Math.exp((Ea/TC_CONFIG.R)*(1/TC_CONFIG.Tref_K - 1/(T_c+273.15))); }
+function tempAt(t,tmax){
+  const {rampEnd,PO,kcool,AMB}=TC_CONFIG;
+  if(t<=rampEnd) return 25+(tmax-25)*(t/rampEnd);
+  if(t<=PO) return tmax;
+  return AMB+(tmax-AMB)*Math.exp(-kcool*(t-PO));
+}
+function computePosition(p){
+  const {dt,END,PO,Tref_C,TaT_floor}=TC_CONFIG;
+  const Ea=CURE_COMPOUNDS[p.compound].Ea, opt=CURE_COMPOUNDS[p.compound].opt;
+  const N=Math.round(END/dt)+1;
+  const time=[],temps=[],ceqSeries=[];
+  let ceq=0, ceqPO=0, tat=0, poIdx=0;
+  for(let i=0;i<N;i++){
+    const t=i*dt, T=tempAt(t,p.tmax);
+    ceq += criOf(T,Ea)*dt;
+    if(t<=PO){ ceqPO=ceq; poIdx=i; }
+    if(T>=TaT_floor) tat+=dt;
+    time.push(+t.toFixed(3)); temps.push(+T.toFixed(1)); ceqSeries.push(+ceq.toFixed(2));
+  }
+  const ceqEnd=ceq;
+  const post=(ceqEnd-ceqPO)/ceqPO*100;
+  const cef=ceqPO/opt*100;
+  let band,bcls;
+  if(cef<90){band="under";bcls="b-red";}
+  else if(cef<=120){band="optimal";bcls="b-green";}
+  else if(cef<=300){band="over-margin";bcls="b-amber";}
+  else {band="excessive";bcls="b-red";}
+  return {...p, time, temps, ceqSeries, ceqPO, ceqEnd, post, tat, cef, band, bcls, poIdx, tmaxActual:Math.max(...temps)};
+}
+const TC_RESULTS = POSITIONS.map(computePosition);
+// mold-health pairs (top/bottom by zone)
+function moldPairs(){
+  const zones=[...new Set(POSITIONS.map(p=>p.zone))];
+  return zones.map(z=>{
+    const top=TC_RESULTS.find(r=>r.zone===z&&r.side==="T");
+    const bot=TC_RESULTS.find(r=>r.zone===z&&r.side==="B");
+    const d=Math.abs(top.tmax-bot.tmax);
+    let status,cls; if(d<=4){status="PASS";cls="b-green";} else if(d<=7){status="WARN";cls="b-amber";} else {status="WARN-HIGH";cls="b-red";}
+    return {zone:z, top:top.tmax, bot:bot.tmax, delta:d, status, cls};
+  });
+}
+
+/* ============================================================
+   STATE
+   ============================================================ */
+window.bomView="catalog"; window.activeCompound="TC-A100"; window.selectedTyre=null;
+let tempChart=null, ceqChart=null;
+
+/* ============================================================
+   BOM — CATALOG
+   ============================================================ */
+function fmtKg(g){ return (g/1000).toFixed(2)+" kg"; }
+function fmtMoney(v){ return "$"+v.toFixed(2); }
+function stackedBar(bom,h){
+  const tot=Object.values(bom).reduce((s,v)=>s+v,0);
+  const r=compByClass(bom,'rubber'),t=compByClass(bom,'textile'),s=compByClass(bom,'steel');
+  return `<div class="sbar" style="height:${h||8}px"><span class="r" style="width:${r/tot*100}%"></span><span class="t" style="width:${t/tot*100}%"></span><span class="s" style="width:${s/tot*100}%"></span></div>`;
+}
+function initBom(){
+  const sel=document.getElementById('compoundSelect');
+  RECIPE_COMPOUNDS.forEach(c=>sel.add(new Option(COMPOUNDS[c].name,c)));
+  const fam=document.getElementById('catFamily');
+  Object.keys(FAMILIES).forEach(f=>fam.add(new Option(f,f)));
+  renderCatStats(); renderFamCards(); renderCatalog();
+  selectCompound("TC-A100");
+}
+function renderCatStats(){
+  const n=TYRES.length;
+  const greens=TYRES.map(t=>t.green);
+  const avgG=greens.reduce((a,b)=>a+b,0)/n;
+  let rubPct=0,cost=0;
+  TYRES.forEach(t=>{const b=tyreBOM(t);rubPct+=compByClass(b,'rubber')/t.green;cost+=tyreCost(b);});
+  rubPct=rubPct/n*100; cost=cost/n;
+  document.getElementById('catStats').innerHTML=`
+    <div class="stat"><div class="lbl">Tyre configurations</div><div class="val" style="color:var(--orange)">${n}</div><div class="sub">${Object.keys(FAMILIES).length} families</div></div>
+    <div class="stat"><div class="lbl">Avg green weight</div><div class="val" style="color:var(--success);font-size:20px">${fmtKg(avgG)}</div><div class="sub">${fmtKg(Math.min(...greens))} – ${fmtKg(Math.max(...greens))}</div></div>
+    <div class="stat"><div class="lbl">Avg rubber share</div><div class="val" style="color:var(--orange);font-size:20px">${rubPct.toFixed(0)}%</div><div class="sub">of total mass</div></div>
+    <div class="stat"><div class="lbl">Avg material cost</div><div class="val" style="color:var(--warning);font-size:20px">${fmtMoney(cost)}</div><div class="sub">per tyre</div></div>`;
+}
+function renderFamCards(){
+  const wrap=document.getElementById('famCards'); wrap.innerHTML='';
+  Object.keys(FAMILIES).forEach(f=>{
+    const ts=TYRES.filter(t=>t.family===f);
+    const avgG=ts.reduce((s,t)=>s+t.green,0)/ts.length;
+    let agg={};COMPONENTS.forEach(c=>agg[c.key]=ts.reduce((s,t)=>s+tyreBOM(t)[c.key],0)/ts.length);
+    const card=document.createElement('div'); card.className='fam-card'; card.id='fam-'+f;
+    card.onclick=()=>{document.getElementById('catFamily').value=f;renderCatalog();document.querySelectorAll('.fam-card').forEach(c=>c.classList.remove('active'));card.classList.add('active');};
+    card.innerHTML=`<div class="name">${f}</div><div class="meta">${ts.length} tyres · ${fmtKg(avgG)} avg</div>${stackedBar(agg,9)}
+      <div class="sbar-key"><span><i style="background:var(--orange)"></i>Rubber</span><span><i style="background:var(--teal)"></i>Textile</span><span><i style="background:var(--warning)"></i>Steel</span></div>`;
+    wrap.appendChild(card);
+  });
+}
+function clearCatFilters(){ document.getElementById('catSearch').value='';document.getElementById('catFamily').value='';document.querySelectorAll('.fam-card').forEach(c=>c.classList.remove('active'));renderCatalog(); }
+function renderCatalog(){
+  const s=document.getElementById('catSearch').value.toLowerCase();
+  const f=document.getElementById('catFamily').value;
+  const rows=TYRES.filter(t=>{
+    if(f&&t.family!==f)return false;
+    if(s&&!(t.size.toLowerCase().includes(s)||t.family.toLowerCase().includes(s)||t.construction.toLowerCase().includes(s)||t.code.toLowerCase().includes(s)))return false;
+    return true;
+  });
+  const maxG=Math.max(...TYRES.map(t=>t.green));
+  document.getElementById('catBody').innerHTML=rows.map(t=>{
+    const b=tyreBOM(t),cost=tyreCost(b);
+    return `<tr class="clickable" onclick="openBreakdown('${t.code}')">
+      <td style="font-weight:600">${t.size}</td>
+      <td class="muted">${t.family}</td>
+      <td class="muted mono" style="font-size:12px">${t.construction}</td>
+      <td><span class="badge ${STATUS_BADGE[t.status]||'b-grey'}">${t.status}</span></td>
+      <td style="min-width:130px">${stackedBar(b,8)}</td>
+      <td><div class="bar-cell"><div class="bar"><span style="width:${t.green/maxG*100}%;background:linear-gradient(90deg,var(--orange),#fb923c)"></span></div><span class="num">${fmtKg(t.green)}</span></div></td>
+      <td class="mono" style="color:var(--warning)">${fmtMoney(cost)}</td>
+    </tr>`;
+  }).join('');
+  document.getElementById('catCount').textContent=`${rows.length} of ${TYRES.length} tyres`;
+}
+function exportCatalogCSV(){
+  const rows=[["Code","Size","Family","Construction","Status","Green(g)","Rubber(g)","Textile(g)","Steel(g)","Cost($)"]];
+  TYRES.forEach(t=>{const b=tyreBOM(t);rows.push([t.code,t.size,t.family,t.construction,t.status,Math.round(t.green),Math.round(compByClass(b,'rubber')),Math.round(compByClass(b,'textile')),Math.round(compByClass(b,'steel')),tyreCost(b).toFixed(2)]);});
+  downloadCSV(rows,"tyre_catalog.csv");
+}
+
+/* ============================================================
+   BOM — BREAKDOWN
+   ============================================================ */
+function openBreakdown(code){ window.selectedTyre=code; setBomView('breakdown'); }
+function renderBreakdown(){
+  const wrap=document.getElementById('view-breakdown');
+  if(!window.selectedTyre){
+    wrap.innerHTML=`<div class="card" style="padding:40px;text-align:center;color:var(--text2)"><i data-lucide="package-search" style="width:40px;height:40px;opacity:.4"></i><div style="margin-top:10px">Select a tyre from the Catalog to compute its BOM.</div></div>`;
+    lucide.createIcons(); return;
+  }
+  const t=TYRES.find(x=>x.code===window.selectedTyre);
+  const b=tyreBOM(t), tot=t.green;
+  const r=compByClass(b,'rubber'),te=compByClass(b,'textile'),st=compByClass(b,'steel');
+  const cost=tyreCost(b);
+  const groups=[...new Set(COMPONENTS.map(c=>c.group))];
+  const maxV=Math.max(...COMPONENTS.map(c=>b[c.key]));
+  const aggBar=(lbl,val,color)=>`<div class="aggreg"><span class="k">${lbl}</span><div class="bar" style="height:8px"><span style="width:${val/tot*100}%;background:${color}"></span></div><span class="num" style="color:${color}">${fmtKg(val)} · ${Math.round(val/tot*100)}%</span></div>`;
+  const groupHTML=groups.map(g=>{
+    const items=COMPONENTS.filter(c=>c.group===g);
+    const rows=items.map(c=>{
+      const v=b[c.key], color=CLASS_COLOR[c.cls];
+      const compLink=c.compound&&RECIPE_COMPOUNDS.includes(c.compound)?` · <span class="comp-link" onclick="event.stopPropagation();jumpToRecipe('${c.compound}')">${c.compound}</span>`:(c.compound?` · <span class="muted mono" style="font-size:11px">${c.compound}</span>`:'');
+      return `<div class="aggreg"><span class="k" style="width:150px;text-transform:none;letter-spacing:0;font-weight:500;color:var(--text)">${c.label}</span>
+        <div class="bar" style="height:7px"><span style="width:${v/maxV*100}%;background:${color}"></span></div>
+        <span class="num" style="color:${color};min-width:74px">${v.toFixed(0)} g</span>
+        <span class="muted mono" style="font-size:11px;min-width:38px;text-align:right">${(v/tot*100).toFixed(1)}%</span>
+        <span class="mono" style="font-size:11px;color:var(--warning);min-width:50px;text-align:right">${fmtMoney(v/1000*c.price)}</span>
+        <span style="font-size:10px;color:var(--text2)">${compLink}</span></div>`;
+    }).join('');
+    return `<div style="margin-bottom:6px"><div class="grp-title">${g}</div>${rows}</div>`;
+  }).join('');
+  wrap.innerHTML=`
+    <button class="btn btn-ghost" style="margin-bottom:14px" onclick="setBomView('catalog')"><i data-lucide="arrow-left"></i>Back to catalog</button>
+    <div class="card" style="padding:16px 18px;margin-bottom:14px">
+      <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
+        <span style="font-weight:700;font-size:18px">${t.size}</span>
+        <span class="muted">${t.family}</span>
+        <span class="mono" style="color:var(--orange);font-size:12px">${t.code}</span>
+        <span class="badge ${STATUS_BADGE[t.status]||'b-grey'}">${t.status}</span>
+        <span class="muted mono" style="font-size:12px;margin-left:auto">${t.construction} construction</span>
+      </div>
+      <div class="bd-head">
+        <div class="bd-cell"><div class="lbl">Green weight</div><div class="val" style="color:var(--success)">${fmtKg(tot)}</div></div>
+        <div class="bd-cell"><div class="lbl">Rubber</div><div class="val" style="color:var(--orange)">${Math.round(r)} g</div></div>
+        <div class="bd-cell"><div class="lbl">Textile</div><div class="val" style="color:var(--teal)">${Math.round(te)} g</div></div>
+        <div class="bd-cell"><div class="lbl">Material cost</div><div class="val" style="color:var(--warning)">${fmtMoney(cost)}</div></div>
+      </div>
+    </div>
+    <div class="card" style="padding:18px 20px">
+      <div style="font-size:10px;text-transform:uppercase;letter-spacing:1.2px;color:var(--text2);margin-bottom:14px">Composition</div>
+      ${aggBar('Rubber',r,'var(--orange)')}${aggBar('Textile',te,'var(--teal)')}${aggBar('Steel',st,'var(--warning)')}
+      <div style="border-top:1px solid var(--border);margin:14px 0 4px"></div>
+      ${groupHTML}
+      <div style="border-top:2px solid var(--border);margin-top:12px;padding-top:12px;display:flex;justify-content:space-between;align-items:baseline">
+        <span style="font-weight:700">Total</span>
+        <span style="display:flex;gap:14px;align-items:baseline"><span class="mono" style="color:var(--warning)">${fmtMoney(cost)}</span><span class="mono" style="font-size:18px;color:var(--success)">${fmtKg(tot)}</span></span>
+      </div>
+    </div>`;
+  lucide.createIcons();
+}
+
+/* ============================================================
+   BOM — COMPOUND RECIPE
+   ============================================================ */
+function jumpToRecipe(code){ setBomView('recipe'); selectCompound(code); window.scrollTo({top:0,behavior:'smooth'}); }
+function totalPhr(code){ return COMPOUNDS[code].ingredients.reduce((s,i)=>s+i.phr,0); }
+function compoundCost(code){ return COMPOUNDS[code].ingredients.reduce((s,i)=>s+i.phr*i.unitCost/100,0); }
+function selectCompound(code){
+  window.activeCompound=code;
+  document.getElementById('compoundSelect').value=code;
+  renderCompoundCard(); renderRecipeTable(); updateContextBadge();
+}
+function renderCompoundCard(){
+  const c=COMPOUNDS[window.activeCompound],m=c.mdProperties,t=c.targetProperties;
+  document.getElementById('compoundCard').innerHTML=`
+    <div class="cc-left">
+      <div class="cc-badges"><span class="code-badge" style="background:${c.color}">${window.activeCompound}</span><span class="cc-name">${c.name.split('—')[1]?.trim()||c.name}</span></div>
+      <div class="cc-app"><i data-lucide="car" style="width:14px;height:14px;vertical-align:-2px"></i> ${c.application}</div>
+      <div class="cc-profile">${c.profile}</div>
+      <div class="cc-cost"><span class="v">$${compoundCost(window.activeCompound).toFixed(2)}</span><span class="k">estimated cost per 100 kg of compound</span></div>
+    </div>
+    <div class="mdr-grid">
+      <div class="mdr-cell"><div class="lbl">Cure time (T90)</div><div class="val">${m.T90} min</div></div>
+      <div class="mdr-cell"><div class="lbl">Scorch safety</div><div class="val">${m.Scorch} min</div></div>
+      <div class="mdr-cell"><div class="lbl">Stiffness (ΔM)</div><div class="val">${m.MHMinus_ML} dNm</div></div>
+      <div class="mdr-cell"><div class="lbl">Activation energy</div><div class="val">${m.Ea} kJ/mol</div></div>
+      <div class="target-strip">
+        <span class="tgt-badge"><span class="k">Hardness</span>${t.hardness}</span><span class="tgt-badge"><span class="k">Tensile</span>${t.tensile}</span>
+        <span class="tgt-badge"><span class="k">Elongation</span>${t.elongation}</span><span class="tgt-badge"><span class="k">Abrasion</span>${t.abrasion}</span>
+      </div>
+    </div>`;
+  lucide.createIcons();
+}
+function renderRecipeTable(){
+  const code=window.activeCompound,c=COMPOUNDS[code],tot=totalPhr(code);
+  const body=document.getElementById('recipeBody');
+  const order=[],groups={};
+  c.ingredients.forEach(i=>{if(!groups[i.category]){groups[i.category]=[];order.push(i.category)}groups[i.category].push(i);});
+  body.innerHTML=order.map(cat=>{
+    const cc=CAT_COLORS[cat]||{c:'#94A3B8',bg:'#1e2735'};
+    return groups[cat].map(ing=>{
+      const pct=tot?ing.phr/tot*100:0,cost=ing.phr*ing.unitCost/100;
+      return `<tr><td><span class="cat-chip" style="color:${cc.c};background:${cc.bg}">${CAT_LABELS[ing.category]||ing.category}</span></td>
+        <td>${ing.name}</td><td style="text-align:right" class="phr-val">${ing.phr.toFixed(1)}</td>
+        <td><div class="bar-cell"><div class="bar"><span style="width:${Math.min(pct,100)}%;background:linear-gradient(90deg,var(--blue),#60a5fa)"></span></div><span class="num">${pct.toFixed(1)}%</span></div></td>
+        <td style="text-align:right" class="mono">$${cost.toFixed(2)}</td><td class="fn-cell">${ing.function}</td></tr>`;
+    }).join('');
+  }).join('');
+  document.getElementById('recipeFoot').innerHTML=`<tr><td>Total</td><td></td><td style="text-align:right" class="mono">${tot.toFixed(1)} phr</td><td>100%</td><td style="text-align:right"><span class="cost-badge">$${compoundCost(code).toFixed(2)} / 100 kg</span></td><td></td></tr>`;
+}
+function exportRecipeCSV(){
+  const code=window.activeCompound,c=COMPOUNDS[code],tot=totalPhr(code);
+  const rows=[["Category","Ingredient","phr","Share","Cost($/100kg)","Function"]];
+  c.ingredients.forEach(i=>rows.push([i.category,i.name,i.phr.toFixed(2),(tot?i.phr/tot*100:0).toFixed(2)+"%","$"+(i.phr*i.unitCost/100).toFixed(2),i.function]));
+  rows.push(["TOTAL","",tot.toFixed(2),"100%","$"+compoundCost(code).toFixed(2),""]);
+  downloadCSV(rows,`${code}_recipe.csv`);
+}
+
+function setBomView(view){
+  window.bomView=view;
+  ['catalog','breakdown','recipe'].forEach(v=>{
+    document.getElementById('bv-'+v).classList.toggle('active',v===view);
+    document.getElementById('view-'+v).style.display=v===view?'block':'none';
+  });
+  if(view==='breakdown') renderBreakdown();
+  updateContextBadge();
+}
+
+/* ============================================================
+   CURE ANALYTICS — UI
+   ============================================================ */
+function initTC(){
+  renderVerdict(); renderInsights(); renderMold(); renderTCDetail();
+  renderTempChart(); renderCeqChart();
+}
+function renderVerdict(){
+  const under=TC_RESULTS.filter(r=>r.band==="under").length;
+  const over=TC_RESULTS.filter(r=>r.band==="over-margin"||r.band==="excessive").length;
+  const optimal=TC_RESULTS.length-under-over;
+  // CEQ-authoritative: pass if no position is grossly under-cured (CEQ basis); advisories noted
+  const headline = under===0 ? "PASS" : "PASS*";
+  const avgPost=(TC_RESULTS.reduce((s,r)=>s+r.post,0)/TC_RESULTS.length);
+  const tmax=Math.max(...TC_RESULTS.map(r=>r.tmax));
+  document.getElementById('verdictHead').innerHTML=`
+    <div class="vh-headline">
+      <div class="lbl">CEQ Verdict — authoritative</div>
+      <div class="v pass">${headline}</div>
+      <div class="meta">${optimal} of ${TC_RESULTS.length} positions land in the optimal cure band. ${under} under-margin, ${over} over-margin — advisory only; all positions reach adequate cure on a pure-kinetics (CEQ) basis. Post-deflation cure adds ~${avgPost.toFixed(0)}% on average.</div>
+    </div>
+    <div class="vh-matrix">
+      <div class="mx-cell"><div class="lbl">Positions</div><div class="val">12 <span class="muted" style="font-size:12px">(6 pairs)</span></div></div>
+      <div class="mx-cell"><div class="lbl">Optimal band</div><div class="val" style="color:var(--success)">${optimal}/12</div></div>
+      <div class="mx-cell"><div class="lbl">Peak temperature</div><div class="val">${tmax}°C</div></div>
+      <div class="mx-cell"><div class="lbl">Post-deflation cure</div><div class="val" style="color:var(--teal)">+${avgPost.toFixed(0)}%</div></div>
+    </div>`;
+}
+function renderInsights(){
+  const avgPost=(TC_RESULTS.reduce((s,r)=>s+r.post,0)/TC_RESULTS.length);
+  const avgTat=(TC_RESULTS.reduce((s,r)=>s+r.tat,0)/TC_RESULTS.length);
+  const moldWarn=moldPairs().filter(m=>m.status!=="PASS").length;
+  document.getElementById('insightGrid').innerHTML=`
+    <div class="insight"><div class="h" style="color:var(--teal)"><i data-lucide="activity"></i>CEQ — cure equivalent</div>
+      <p>Each temperature history is integrated with the <b>Arrhenius</b> rate to give <b>cure-equivalent minutes</b> at a 150 °C reference. This is the authoritative measure of how much cure each zone received.</p></div>
+    <div class="insight"><div class="h" style="color:var(--blue)"><i data-lucide="clock"></i>TaT — time-at-temperature</div>
+      <div class="big" style="color:var(--blue)">${avgTat.toFixed(1)} min</div>
+      <p>Average time spent ≥160 °C. A <b>kinetics-free cross-check</b> on CEQ, bounded by a floor (T90×1.05) and a reversion ceiling.</p></div>
+    <div class="insight"><div class="h" style="color:var(--orange)"><i data-lucide="gauge"></i>%CEF — % of optimum</div>
+      <p><b>CEQ at press-open ÷ optimum cure</b> (batch T90 × shift) × 100. Banded: under &lt;90% · optimal 90–120% · over-margin up to 300% · excessive &gt;300%.</p></div>
+    <div class="insight"><div class="h" style="color:var(--purple)"><i data-lucide="git-compare-arrows"></i>Mold / press health</div>
+      <div class="big" style="color:${moldWarn?'var(--warning)':'var(--success)'}">${moldWarn? moldWarn+' advisory':'All even'}</div>
+      <p>Top vs bottom ΔT across 6 pairs. Flags press asymmetry — <b>advisory only</b>, never changes the cure verdict.</p></div>
+    <div class="insight"><div class="h" style="color:var(--success)"><i data-lucide="trending-up"></i>Post-deflation cure</div>
+      <div class="big" style="color:var(--success)">+${avgPost.toFixed(0)}%</div>
+      <p>Extra cure that accumulates from <b>residual heat after the press opens</b> — the hot tyre keeps curing while it cools. Captured as CEQ@end − CEQ@open.</p></div>`;
+  lucide.createIcons();
+}
+function renderMold(){
+  document.getElementById('moldGrid').innerHTML=moldPairs().map(m=>`
+    <div class="mold-cell"><div class="z">${m.zone}</div>
+      <div class="d" style="color:${m.cls==='b-green'?'var(--success)':m.cls==='b-amber'?'var(--warning)':'var(--error)'}">Δ ${m.delta.toFixed(1)}°C</div>
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-top:6px"><span class="muted mono" style="font-size:11px">${m.top} / ${m.bot}°C</span><span class="badge ${m.cls}">${m.status}</span></div>
+    </div>`).join('');
+}
+function renderTCDetail(){
+  document.getElementById('tcDetailBody').innerHTML=TC_RESULTS.map(r=>`
+    <tr><td class="mono">${r.ch}.${r.side}</td><td>${r.zone}</td><td class="mono" style="font-size:12px">${r.compound}</td>
+      <td style="text-align:right" class="mono">${r.tmax}</td>
+      <td style="text-align:right" class="mono">${r.ceqPO.toFixed(1)}</td>
+      <td style="text-align:right" class="mono">${r.ceqEnd.toFixed(1)}</td>
+      <td style="text-align:right" class="mono" style="color:var(--teal)">+${r.post.toFixed(0)}%</td>
+      <td style="text-align:right" class="mono">${r.cef.toFixed(0)}%</td>
+      <td><span class="badge ${r.bcls}">${r.band}</span></td></tr>`).join('');
+}
+const POlineMin=TC_CONFIG.PO;
+function poPlugin(label){return {id:'po',afterDatasetsDraw(ch){const{ctx,chartArea:{top,bottom},scales:{x}}=ch;if(!x)return;const xp=x.getPixelForValue(POlineMin);ctx.save();ctx.setLineDash([4,4]);ctx.strokeStyle='#94A3B8';ctx.lineWidth=1.3;ctx.beginPath();ctx.moveTo(xp,top);ctx.lineTo(xp,bottom);ctx.stroke();ctx.setLineDash([]);ctx.fillStyle='#94A3B8';ctx.font='600 10px Inter';ctx.textAlign='left';ctx.fillText('press open',xp+4,top+12);ctx.restore();}};}
+const trefPlugin={id:'tref',afterDatasetsDraw(ch){const{ctx,chartArea:{left,right},scales:{y}}=ch;if(!y)return;const yp=y.getPixelForValue(150);ctx.save();ctx.setLineDash([6,5]);ctx.strokeStyle='#F59E0B';ctx.lineWidth=1.3;ctx.beginPath();ctx.moveTo(left,yp);ctx.lineTo(right,yp);ctx.stroke();ctx.setLineDash([]);ctx.fillStyle='#F59E0B';ctx.font='600 10px Inter';ctx.fillText('150°C ref',left+6,yp-5);ctx.restore();}};
+function buildLegend(chart,elId){
+  const el=document.getElementById(elId); el.innerHTML='';
+  chart.data.datasets.forEach((ds,i)=>{
+    const it=document.createElement('span'); it.className='it';
+    it.innerHTML=`<span class="dot" style="background:${ds.borderColor}"></span>${ds.label}`;
+    it.onclick=()=>{const meta=chart.getDatasetMeta(i);meta.hidden=meta.hidden===null?!chart.data.datasets[i].hidden:!meta.hidden;it.classList.toggle('off');chart.update();};
+    el.appendChild(it);
+  });
+}
+function renderTempChart(){
+  const ctx=document.getElementById('tempChart');
+  if(tempChart)tempChart.destroy();
+  tempChart=new Chart(ctx,{type:'line',
+    data:{labels:TC_RESULTS[0].time,datasets:TC_RESULTS.map((r,i)=>({label:`${r.ch}.${r.zone.split(' ').map(w=>w[0]).join('')}${r.side}`,data:r.temps,borderColor:TC_COLORS[i],backgroundColor:TC_COLORS[i],borderWidth:1.4,pointRadius:0,tension:.25}))},
+    options:{responsive:true,maintainAspectRatio:false,interaction:{mode:'nearest',intersect:false},
+      scales:{x:{type:'linear',title:{display:true,text:'Time from cure start (min)',color:'#94A3B8'},ticks:{color:'#94A3B8',maxTicksLimit:12,callback:function(v){return (+this.getLabelForValue(v)).toFixed(0)}},grid:{color:'#1e2735'},min:0,max:16},
+        y:{title:{display:true,text:'Temperature (°C)',color:'#94A3B8'},ticks:{color:'#94A3B8'},grid:{color:'#1e2735'},min:0,max:200}},
+      plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>` ${c.dataset.label}: ${c.parsed.y}°C`}}}},
+    plugins:[trefPlugin,poPlugin()]});
+  buildLegend(tempChart,'legTemp');
+}
+function renderCeqChart(){
+  const ctx=document.getElementById('ceqChart');
+  if(ceqChart)ceqChart.destroy();
+  ceqChart=new Chart(ctx,{type:'line',
+    data:{labels:TC_RESULTS[0].time,datasets:TC_RESULTS.map((r,i)=>({label:`${r.ch}.${r.zone.split(' ').map(w=>w[0]).join('')}${r.side}`,data:r.ceqSeries,borderColor:TC_COLORS[i],backgroundColor:TC_COLORS[i],borderWidth:1.4,pointRadius:0,tension:.2}))},
+    options:{responsive:true,maintainAspectRatio:false,interaction:{mode:'nearest',intersect:false},
+      scales:{x:{type:'linear',title:{display:true,text:'Time from cure start (min)',color:'#94A3B8'},ticks:{color:'#94A3B8',maxTicksLimit:12,callback:function(v){return (+this.getLabelForValue(v)).toFixed(0)}},grid:{color:'#1e2735'},min:0,max:16},
+        y:{title:{display:true,text:'Cumulative CEQ (min)',color:'#94A3B8'},ticks:{color:'#94A3B8'},grid:{color:'#1e2735'},beginAtZero:true}},
+      plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>` ${c.dataset.label}: ${c.parsed.y.toFixed(1)} CEQ`}}}},
+    plugins:[poPlugin()]});
+  buildLegend(ceqChart,'legCeq');
+}
+function exportTCDetailCSV(){
+  const rows=[["Ch.Side","Zone","Compound","Tmax(C)","CEQ@open","CEQ@end","PostCure%","%CEF","Band"]];
+  TC_RESULTS.forEach(r=>rows.push([r.ch+"."+r.side,r.zone,r.compound,r.tmax,r.ceqPO.toFixed(2),r.ceqEnd.toFixed(2),r.post.toFixed(1),r.cef.toFixed(1),r.band]));
+  downloadCSV(rows,"cure_positions.csv");
+}
+
+/* ============================================================
+   CHATBOT WIDGET
+   ============================================================ */
+const N8N_WEBHOOK_URL="https://oussama19.app.n8n.cloud/webhook/engineering-chatbot";
+const QUICK_PROMPTS={
+  bom:['What is 6PPD?','Why split rubber/textile/steel?','Explain phr units','Cost driver in this BOM?'],
+  tc:['What is CEQ?','CEQ vs TaT?','What is post-deflation cure?','Why flag mold ΔT?']
+};
+const WELCOME="Hello — I'm your technical assistant for this Engineering Suite. I can answer questions about compound formulations, tyre BOM structures, material composition, curing analysis, CEQ / TaT / CEF, and rubber processing. What would you like to know?";
+
+function buildContext(){
+  const sec=document.querySelector('.app-section.active')?.id;
+  if(sec==='section-bom'){
+    const base={section:"BOM Intelligence", view:window.bomView};
+    if(window.bomView==='recipe'){const c=COMPOUNDS[window.activeCompound];return{...base,active_compound:window.activeCompound,compound_name:c?.name,mdr_properties:c?.mdProperties};}
+    if(window.bomView==='breakdown'&&window.selectedTyre){const t=TYRES.find(x=>x.code===window.selectedTyre),b=tyreBOM(t);return{...base,tyre:t.size,family:t.family,green_g:Math.round(t.green),rubber_g:Math.round(compByClass(b,'rubber')),textile_g:Math.round(compByClass(b,'textile')),steel_g:Math.round(compByClass(b,'steel')),material_cost:tyreCost(b).toFixed(2)};}
+    return {...base, total_tyres:TYRES.length, families:Object.keys(FAMILIES)};
+  }
+  if(sec==='section-tc'){
+    const under=TC_RESULTS.filter(r=>r.band==='under').length;
+    return {section:"Cure Analytics", positions:12, optimal_band:TC_RESULTS.filter(r=>r.band==='optimal').length, under_margin:under,
+      avg_post_deflation_pct:+(TC_RESULTS.reduce((s,r)=>s+r.post,0)/TC_RESULTS.length).toFixed(1),
+      peak_temp_C:Math.max(...TC_RESULTS.map(r=>r.tmax)), ref_temp_C:TC_CONFIG.Tref_C};
+  }
+  return {section:"General"};
+}
+function nowTime(){return new Date().toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'});}
+function appendMessage(role,text){
+  const wrap=document.getElementById('cbMessages');
+  const m=document.createElement('div');m.className='msg '+role;
+  m.innerHTML=`<div class="bubble"></div><div class="time">${nowTime()}</div>`;
+  m.querySelector('.bubble').textContent=text;
+  wrap.appendChild(m);scrollMessages();
+}
+function scrollMessages(){const w=document.getElementById('cbMessages');w.scrollTop=w.scrollHeight;}
+function showTypingIndicator(){hideTypingIndicator();const t=document.createElement('div');t.className='typing';t.id='typingInd';t.innerHTML='<span></span><span></span><span></span>';document.getElementById('cbMessages').appendChild(t);scrollMessages();}
+function hideTypingIndicator(){document.getElementById('typingInd')?.remove();}
+function showError(msg,last){
+  document.getElementById('cbError')?.remove();
+  const e=document.createElement('div');e.className='cb-error';e.id='cbError';
+  e.innerHTML=`<span><i data-lucide="alert-triangle" style="width:14px;height:14px;vertical-align:-2px"></i> ${msg}</span>`;
+  const b=document.createElement('button');b.className='btn';b.textContent='Retry';b.onclick=()=>{e.remove();sendMessage(last);};
+  e.appendChild(b);document.getElementById('cbMessages').appendChild(e);scrollMessages();lucide.createIcons();
+}
+async function sendMessage(userMessage){
+  const context=buildContext();
+  const payload={message:userMessage,context:JSON.stringify(context),product:context.section==="BOM Intelligence"?"bom":(context.section==="Cure Analytics"?"tc":"general")};
+  try{
+    showTypingIndicator();
+    const res=await fetch(N8N_WEBHOOK_URL,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(payload)});
+    if(!res.ok)throw new Error(`HTTP ${res.status}`);
+    const data=await res.json();hideTypingIndicator();
+    appendMessage("bot",data.reply||data.message||"Sorry, I could not process that request.");
+  }catch(err){hideTypingIndicator();showError("Connection error — please try again.",userMessage);console.error("Chatbot error:",err);}
+}
+function renderQuickPrompts(){
+  const sec=document.querySelector('.app-section.active')?.id==='section-tc'?'tc':'bom';
+  document.getElementById('quickPrompts')?.remove();
+  const wrap=document.getElementById('cbMessages');
+  const qp=document.createElement('div');qp.className='quick-prompts';qp.id='quickPrompts';
+  QUICK_PROMPTS[sec].forEach(text=>{const b=document.createElement('button');b.className='qp';b.textContent=text;b.onclick=()=>{document.getElementById('cbInput').value=text;onSendClick();};qp.appendChild(b);});
+  wrap.appendChild(qp);
+}
+function resetConversation(){
+  document.getElementById('cbMessages').innerHTML='';
+  document.getElementById('cbError')?.remove();
+  appendMessage('bot',WELCOME);
+  renderQuickPrompts();
+}
+function onInputChange(){const ta=document.getElementById('cbInput');ta.style.height='auto';ta.style.height=Math.min(ta.scrollHeight,78)+'px';const l=ta.value.length;document.getElementById('charCount').textContent=l>200?`${l} characters`:'';}
+function onInputKey(e){if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();onSendClick();}}
+function onSendClick(){const ta=document.getElementById('cbInput');const t=ta.value.trim();if(!t)return;appendMessage('user',t);ta.value='';onInputChange();document.getElementById('cbError')?.remove();sendMessage(t);}
+function openChatbot(){document.getElementById('cbWindow').classList.remove('closed');document.getElementById('cbFab').classList.add('hidden');setTimeout(()=>document.getElementById('cbInput').focus(),200);scrollMessages();}
+function closeChatbot(){document.getElementById('cbWindow').classList.add('closed');document.getElementById('cbFab').classList.remove('hidden');}
+function updateContextBadge(){
+  const sec=document.querySelector('.app-section.active')?.id;
+  let txt='General';
+  if(sec==='section-bom'){ txt = window.bomView==='recipe'?`BOM · ${window.activeCompound}` : window.bomView==='breakdown'&&window.selectedTyre?`BOM · ${TYRES.find(t=>t.code===window.selectedTyre).size}`:'BOM · Catalog'; }
+  else if(sec==='section-tc') txt='Cure · 12 positions';
+  document.getElementById('ctxBadge').textContent=txt;
+}
+
+/* ============================================================
+   SHARED + INIT
+   ============================================================ */
+function downloadCSV(rows,filename){
+  const csv=rows.map(r=>r.map(c=>{const s=String(c);return /[",\n]/.test(s)?`"${s.replace(/"/g,'""')}"`:s;}).join(',')).join('\n');
+  const blob=new Blob([csv],{type:'text/csv;charset=utf-8;'});const url=URL.createObjectURL(blob);const a=document.createElement('a');
+  a.href=url;a.download=filename;document.body.appendChild(a);a.click();document.body.removeChild(a);URL.revokeObjectURL(url);
+}
+function switchSection(which){
+  document.getElementById('section-bom').className='app-section '+(which==='bom'?'active':'hidden');
+  document.getElementById('section-tc').className='app-section '+(which==='tc'?'active':'hidden');
+  document.getElementById('tab-bom').classList.toggle('active',which==='bom');
+  document.getElementById('tab-tc').classList.toggle('active',which==='tc');
+  updateContextBadge();renderQuickPrompts();
+}
+window.addEventListener('DOMContentLoaded',()=>{
+  Chart.defaults.color='#94A3B8';Chart.defaults.font.family='Inter';
+  initBom(); initTC();
+  appendMessage('bot',WELCOME); renderQuickPrompts(); updateContextBadge();
+  lucide.createIcons();
+});
+</script>
+</body>
+</html>
