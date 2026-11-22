@@ -481,7 +481,7 @@ const CAT_COLORS = {
 const CAT_LABELS = { Polymer:"Rubber base", Filler:"Reinforcement", Coupling:"Coupling agent", Activator:"Activator", Antideg:"Protection", Process:"Processing aid", Curative:"Curing system" };
 
 /* ============================================================
-   TYRE CATALOG + BOM (IRIS-inspired structure, generic data)
+   Tyre catalogue + BOM (generic, illustrative data)
    Each tyre's component weights are COMPUTED from a component
    template scaled to green weight (geometry-style derivation).
    ============================================================ */
@@ -925,6 +925,19 @@ function exportTCDetailCSV(){
    CHATBOT WIDGET
    ============================================================ */
 const N8N_WEBHOOK_URL="https://oussama19.app.n8n.cloud/webhook/engineering-chatbot";
+// SANDBOX BY DEFAULT: network calls only with ?live=1
+const LIVE=new URLSearchParams(location.search).get('live')==='1';
+const DEMO_ANSWERS={
+  bom:[[/6ppd|antidegradant|antiozon/,'6PPD is an antidegradant that protects rubber against ozone and flex cracking; it sits in the chemicals group of the BOM.'],[/phr/,'phr = parts per hundred rubber: each ingredient is expressed relative to 100 parts of polymer.'],[/split|textile|steel|reinforc/,'The BOM is split into rubber, textile and steel because each group has a different cost, supplier and function (matrix vs. reinforcement).'],[/cost|driver|price/,'In a typical tyre BOM the largest cost drivers are polymers, filler and the steel reinforcement (illustrative, generic data).']],
+  tc:[[/ceq|cure equivalent/,'CEQ (cure equivalent) converts the temperature history into equivalent minutes at a reference temperature using an Arrhenius model.'],[/tat|time at/,'TaT is plain time at temperature; CEQ weights time by how fast the cure actually proceeds, so it is more representative.'],[/post|deflat/,'Post-deflation cure is the extra cure the tyre receives after the press opens, while it is still hot.'],[/mold|mould|delta|Δt/,'A mould temperature difference (delta T) flags uneven heating, which causes uneven cure across the tyre.']],
+  general:[]
+};
+function demoAnswer(q,product){
+  const t=q.toLowerCase();
+  for(const [re,a] of (DEMO_ANSWERS[product]||[]).concat(DEMO_ANSWERS.bom,DEMO_ANSWERS.tc)) if(re.test(t)) return a+'\n\n(Demo mode — canned answer, no AI call.)';
+  const hint=product==='bom'?'Try: "What is 6PPD?", "Explain phr units".':product==='tc'?'Try: "What is CEQ?", "CEQ vs TaT?".':'Open the BOM or Cure tab for topic-specific answers.';
+  return 'This is a sandbox demo with canned answers. '+hint+'\n\n(Demo mode — add ?live=1 for the AI assistant.)';
+}
 const QUICK_PROMPTS={
   bom:['What is 6PPD?','Why split rubber/textile/steel?','Explain phr units','Cost driver in this BOM?'],
   tc:['What is CEQ?','CEQ vs TaT?','What is post-deflation cure?','Why flag mold ΔT?']
@@ -968,6 +981,7 @@ function showError(msg,last){
 async function sendMessage(userMessage){
   const context=buildContext();
   const payload={message:userMessage,context:JSON.stringify(context),product:context.section==="BOM Intelligence"?"bom":(context.section==="Cure Analytics"?"tc":"general")};
+  if(!LIVE){showTypingIndicator();setTimeout(()=>{hideTypingIndicator();appendMessage("bot",demoAnswer(userMessage,payload.product));},350);return;}
   try{
     showTypingIndicator();
     const res=await fetch(N8N_WEBHOOK_URL,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(payload)});

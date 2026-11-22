@@ -2,7 +2,9 @@
 
 > A single-file interactive demo for tyre and rubber manufacturers.
 
-**Live demo →** [View on GitHub Pages](../../)
+**Live demo →** [View on GitHub Pages](https://oussamarevolotionary.github.io/manufacturer-engineering-suite/)
+
+**v1 — superseded by the TC Cure Engine demo.** The chatbot runs in sandbox mode by default (canned answers, no network calls); add `?live=1` for the n8n backend.
 
 ---
 
